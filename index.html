@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3am Design Studio</title>
+  <script src="https://unpkg.com/lenis@1.1.2/dist/lenis.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F5F2;
+      --black: #000;
+      --white: #fff;
+      --dark: #3B3B3B;
+      --mg: 50px;
+    }
+
+    html.lenis, html.lenis body { height: auto; }
+    .lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+    body {
+      background: var(--bg);
+      color: var(--black);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CURSOR ── */
+    #cursor {
+      position: fixed; top: 0; left: 0;
+      width: 20px; height: 20px;
+      border: 1.5px solid var(--black);
+      border-radius: 50%;
+      pointer-events: none; z-index: 99999;
+      transform: translate3d(-50%,-50%,0);
+      mix-blend-mode: difference;
+      transition: width .3s, height .3s, background-color .3s, border-color .3s;
+      will-change: transform;
+    }
+    #cursor.hover { width: 60px; height: 60px; background: var(--black); }
+    #cursor.discover {
+      width: 100px; height: 100px;
+      background: var(--black); border-color: var(--black);
+      mix-blend-mode: normal;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #cursor.discover::after {
+      content: 'DISCOVER';
+      color: white; font-size: 10px; font-weight: 600;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px var(--mg);
+      mix-blend-mode: difference; color: white;
+    }
+    .nav-logo img { height: 20px; display: block; filter: brightness(0) invert(1); }
+    .nav-links {
+      display: flex; gap: 56px; list-style: none;
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-links a {
+      font-size: 16px; font-weight: 500; color: white;
+      text-decoration: none; transition: opacity 0.2s;
+    }
+    .nav-links a:hover { opacity: 0.5; }
+    .nav-right { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 300; }
+    .nav-right img { height: 16px; filter: brightness(0) invert(1); }
+
+    /* ── HERO ── */
+    /* Figma: Landing frame 1940 × 1025 */
+    .hero {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1940 / 1025;
+      overflow: hidden;
+    }
+
+    /* ayoh — Figma inset [7.22% 15.13% 17.94% 0] */
+    .hero-ayoh {
+      position: absolute;
+      top: 7.22%; right: 15.13%; bottom: 17.94%; left: 0;
+    }
+    .hero-ayoh img { width: 100%; height: 100%; display: block; }
+
+    /* Each hand absolutely positioned per Figma — all share top:53.16% bottom:2.46% */
+    .hand {
+      position: absolute;
+      top: 53.16%;
+      bottom: 2.46%;
+    }
+    .hand img {
+      width: 100%; height: 100%; display: block;
+      object-fit: contain; object-position: bottom center;
+      transform-origin: bottom center;
+    }
+    /* Figma insets: hand_N → [53.16%  right%  2.46%  left%] */
+    .hand-1 { left: 35.62%; right: 54.13%; }
+    .hand-2 { left: 45.87%; right: 43.88%; }
+    .hand-3 { left: 56.12%; right: 33.64%; }
+    .hand-4 { left: 66.36%; right: 23.39%; }
+    .hand-5 { left: 76.74%; right: 13.01%; }
+    .hand-6 { left: 87.12%; right:  2.61%; }
+
+    /* Scroll — Figma inset [89.54% 92.99% 6.16% 6.24%] → 15 × 44px */
+    .hero-scroll {
+      position: absolute;
+      left: 6.24%; bottom: 6.16%;
+      width: 15px; height: 44px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      gap: 5px; opacity: 0.35;
+    }
+    .hero-scroll::before {
+      content: ''; flex: 1; width: 1px; background: var(--black);
+    }
+    .hero-scroll::after {
+      content: ''; width: 5px; height: 5px;
+      border-radius: 50%; background: var(--black);
+      animation: scrollDot 2s ease-in-out infinite;
+    }
+    @keyframes scrollDot {
+      0%, 100% { transform: translateY(0); opacity: 1; }
+      50%       { transform: translateY(4px); opacity: 0.4; }
+    }
+
+    /* Sway animations */
+    @keyframes swayR { 0% { transform: rotate(-3deg); } 100% { transform: rotate(3deg); } }
+    @keyframes swayV { 0% { transform: translateY(0) rotate(.5deg); } 100% { transform: translateY(12px) rotate(-1deg); } }
+    @keyframes swayC { 0% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(8px) rotate(1.5deg); } 100% { transform: translateY(2px) rotate(0); } }
+    .sway-1 { animation: swayR 4.5s ease-in-out infinite alternate; }
+    .sway-2 { animation: swayV 3.8s ease-in-out infinite alternate .5s; }
+    .sway-3 { animation: swayC 5.2s ease-in-out infinite alternate .2s; }
+    .sway-4 { animation: swayR 4.1s ease-in-out infinite alternate-reverse 1s; }
+    .sway-5 { animation: swayV 4.7s ease-in-out infinite alternate .7s; }
+    .sway-6 { animation: swayC 4.0s ease-in-out infinite alternate-reverse .4s; }
+
+    /* ── WORKS INTRO ── */
+    .works-intro {
+      background: var(--white);
+      margin: 40px var(--mg) 0;
+      padding: 56px 56px 56px 80px;
+      position: relative; border-radius: 4px;
+    }
+    .scroll-label {
+      position: absolute; left: 24px; top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      font-size: 9px; letter-spacing: 4px; opacity: 0.2; white-space: nowrap;
+    }
+    .works-intro h2 { font-size: 64px; font-weight: 500; line-height: 1.05; margin-bottom: 28px; }
+    .works-intro-meta { display: flex; gap: 60px; align-items: flex-start; margin-bottom: 36px; }
+    .works-intro-logo img { height: 20px; display: block; }
+    .works-intro-sub { font-size: 14px; line-height: 1.8; opacity: 0.55; }
+    .works-intro-imgs {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-rows: 200px 130px;
+      gap: 8px;
+    }
+    .wi { background: #c5c5c5; border-radius: 4px; }
+    .wi.a { grid-column: 1; grid-row: 1/3; }
+    .wi.b { grid-column: 2; grid-row: 1; }
+    .wi.c { grid-column: 3; grid-row: 1; }
+    .wi.d { grid-column: 2; grid-row: 2; opacity: .5; }
+    .wi.e { grid-column: 3; grid-row: 2; opacity: .35; background: #aaa; }
+
+    /* ── SKILLS ── */
+    /* Figma: Skills frame 85:57, 1920 × 887 */
+    .skills {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1920 / 887;
+      overflow: hidden;
+    }
+
+    /* "What we do." — inset [4.85% 47.66% 93.12% 47.71%] */
+    .skills-eyebrow {
+      position: absolute;
+      top: 4.85%; right: 47.66%; bottom: 93.12%; left: 47.71%;
+      display: flex; align-items: center;
+      font-size: 0.78vw; font-weight: 400; white-space: nowrap;
+    }
+
+    /* Diagonal service words — each container placed by Figma insets, text rotated 9° */
+    .skills-word {
+      position: absolute;
+      display: flex; align-items: center; justify-content: center;
+      overflow: visible;
+    }
+    .skills-word span {
+      font-size: 6.25vw; font-weight: 900;
+      white-space: nowrap; line-height: 1;
+      transform: rotate(9deg); display: block;
+    }
+    .sw-more span { font-size: 2.60vw; }
+
+    /* Figma insets [top right bottom left] relative to 1920×887 frame */
+    .sw-uxui    { top: 0.08%;  right: 79.15%; bottom: 78.48%; left:  4.23%; }
+    .sw-webapp  { top: 6.03%;  right: 43.09%; bottom: 66.23%; left: 21.93%; }
+    .sw-brand   { top: 18.38%; right: -2.74%; bottom: 50.52%; left: 57.94%; }
+    .sw-digital { top: 32.02%; right: 43.82%; bottom: 35.32%; left:  6.84%; }
+    .sw-visual  { top: 23.05%; right:  2.13%; bottom: 36.55%; left: 25.96%; }
+    .sw-more    { top: 56.68%; right: 29.64%; bottom: 31.71%; left: 55.82%; }
+
+    /* Hand illustration — visual_01 (back) → visual_03 (front) */
+    .skills-vis { position: absolute; }
+    .skills-vis img { width: 100%; height: 100%; display: block; }
+    .vis-h1 { top: 44.04%; right:  6.06%; bottom:  0.01%; left: 69.28%; }
+    .vis-h2 { top: 40.25%; right:  5.43%; bottom: -3.78%; left: 67.19%; }
+    .vis-h3 { top: 36.18%; right:  4.58%; bottom: -5.65%; left: 67.19%; }
+
+    /* Bullet dots — ~5×5px circles */
+    .skills-dot {
+      position: absolute; left: 2.6%;
+      width: 5px; height: 5px;
+      border-radius: 50%; background: var(--black);
+    }
+    .dot-1 { top: 71.98%; }
+    .dot-2 { top: 76.04%; }
+    .dot-3 { top: 80.10%; }
+
+    /* Stat text — 20px = 1.04vw at frame width */
+    .skills-stat {
+      position: absolute;
+      font-size: 1.04vw; font-weight: 400; white-space: nowrap;
+      display: flex; align-items: center;
+    }
+    .stat-1 { top: 70.80%; right: 85.27%; bottom: 26.49%; left: 3.59%; }
+    .stat-2 { top: 74.86%; right: 78.44%; bottom: 22.44%; left: 3.59%; }
+    .stat-3 { top: 78.92%; right: 81.93%; bottom: 18.38%; left: 3.59%; }
+
+    /* Award logos — absolute, order left→right: HKDA, Aww, W3, Horizon, WebAward, Com */
+    .skills-award { position: absolute; }
+    .skills-award img { width: 100%; height: 100%; object-fit: contain; object-position: left center; }
+    .award-hkda    { top: 85.57%; right: 95.27%; bottom:  7.27%; left:  2.60%; }
+    .award-aww     { top: 88.05%; right: 86.21%; bottom:  9.77%; left:  7.45%; }
+    .award-w3      { top: 87.15%; right: 81.65%; bottom:  8.88%; left: 16.51%; }
+    .award-horizon { top: 87.94%; right: 74.41%; bottom:  9.53%; left: 21.04%; }
+    .award-web     { top: 87.26%; right: 69.60%; bottom:  9.01%; left: 28.28%; }
+    .award-com     { top: 87.49%; right: 60.42%; bottom:  9.10%; left: 33.13%; }
+
+    /* ── MORE & MORE — scrolling marquee ── */
+    .clients-section { padding: 0 0 80px; overflow: hidden; }
+    .clients-label {
+      text-align: center; font-size: 11px; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      opacity: .4; margin-bottom: 24px;
+    }
+
+    :root { --logo-w: calc(100vw / 5); }
+    .client-marquee-track { display: flex; flex-wrap: nowrap; width: 100%; overflow: hidden; }
+    .client-marquee-group {
+      display: flex; flex-shrink: 0; flex-wrap: nowrap;
+      align-items: center; will-change: transform;
+      width: calc(var(--logo-w) * 10);
+    }
+    .anim-rl { animation: scroll-rl 30s linear infinite; }
+    .anim-lr { animation: scroll-lr 30s linear infinite; }
+    @keyframes scroll-rl { from { transform: translate3d(0,0,0); } to { transform: translate3d(calc(var(--logo-w) * -10),0,0); } }
+    @keyframes scroll-lr { from { transform: translate3d(calc(var(--logo-w) * -10),0,0); } to { transform: translate3d(0,0,0); } }
+    .client-logo-wrapper { flex-shrink: 0; width: var(--logo-w); padding: 0 24px; display: flex; align-items: center; justify-content: center; }
+    .client-logo-wrapper img { width: 100%; max-height: 36px; object-fit: contain; filter: grayscale(100%); opacity: .5; transition: opacity .2s, filter .2s; }
+    .client-logo-wrapper:hover img { filter: none; opacity: 1; }
+
+    /* ── PORTFOLIO ── */
+    .portfolio-section { padding: 0 var(--mg) 0; }
+    .port-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    .port-card {
+      background: var(--dark); border-radius: 20px;
+      overflow: hidden; cursor: none;
+      position: relative; display: block;
+    }
+    .port-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+    .port-card:hover img { transform: scale(1.02); }
+
+    /* Exact Figma ratios from canvas:
+       1200/696 ≈ aspect[1132/695] | 580/696 ≈ aspect[546/695]
+       580/420 ≈ aspect[546/420]
+    */
+    .pc-01 { grid-column: span 4; aspect-ratio: 1132/695; }
+    .pc-02 { grid-column: span 2; aspect-ratio: 546/695; }
+    .pc-03 { grid-column: span 2; aspect-ratio: 546/420; }
+    .pc-04 { grid-column: span 2; aspect-ratio: 546/420; }
+    .pc-05 { grid-column: span 2; aspect-ratio: 546/420; }
+    .pc-06 { grid-column: span 2; aspect-ratio: 546/695; }
+    .pc-07 { grid-column: span 4; aspect-ratio: 1132/695; }
+
+    /* ── CONTACT ── */
+    .contact-section {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      padding: 60px var(--mg) 60px;
+      align-items: end;
+    }
+    .contact-illustration { grid-column: 1 / 4; }
+    .contact-illustration img { width: 100%; max-width: 460px; display: block; }
+    .contact-content { grid-column: 4 / 7; padding-left: 20px; }
+    .contact-eyebrow { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; opacity: .4; margin-bottom: 16px; line-height: 1.6; }
+    .contact-content h2 { font-size: 48px; font-weight: 500; line-height: 1.08; margin-bottom: 24px; }
+
+    /* aixhuman.svg as heading */
+    .contact-aixhuman { width: 100%; max-width: 340px; height: auto; display: block; margin-bottom: 32px; }
+
+    .contact-body { font-size: 24px; line-height: 1.5; margin-bottom: 48px; }
+    .contact-divider { height: 1px; background: rgba(0,0,0,.15); margin-bottom: 32px; }
+    .contact-cta { font-size: 12px; font-weight: 500; text-transform: uppercase; opacity: .4; margin-bottom: 4px; }
+    .contact-cta-b { font-size: 12px; font-weight: 500; text-transform: uppercase; margin-bottom: 24px; }
+    .contact-links { display: flex; flex-direction: column; gap: 8px; }
+    .contact-links a { font-size: 20px; font-weight: 500; color: var(--black); text-decoration: none; transition: opacity .2s; }
+    .contact-links a:hover { opacity: .4; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 28px var(--mg);
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid rgba(0,0,0,.1);
+    }
+    footer img { height: 24px; }
+    .footer-copy { font-size: 12px; opacity: .4; }
+
+    /* ── REVEAL ── */
+    .reveal-up { opacity: 0; transform: translateY(30px); transition: opacity 1.2s cubic-bezier(.22,1,.36,1), transform 1.2s cubic-bezier(.22,1,.36,1); }
+    .reveal-up.active { opacity: 1; transform: translateY(0); }
+
+    /* ── MODAL ── */
+    #modal-backdrop {
+      position: fixed; inset: 0; z-index: 90000;
+      background: rgba(0,0,0,.8); opacity: 0;
+      pointer-events: none; transition: opacity .7s;
+    }
+    #modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    #project-modal {
+      position: fixed; inset: 0; z-index: 99999;
+      background: var(--bg); display: flex; flex-direction: column;
+      transform: translateY(100%); transition: transform .7s cubic-bezier(.22,1,.36,1);
+      overflow: hidden;
+    }
+    #project-modal.open { transform: translateY(0); }
+    .modal-header {
+      position: absolute; top: 28px; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 var(--mg); z-index: 10;
+    }
+    .modal-header-center { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .modal-header-right { display: flex; align-items: center; gap: 12px; }
+    .modal-btn {
+      background: none; border: none; cursor: none;
+      padding: 8px; display: flex; align-items: center; justify-content: center;
+      opacity: .7; transition: opacity .2s;
+    }
+    .modal-btn:hover { opacity: 1; }
+    .modal-btn img { width: 20px; height: auto; }
+    .modal-body {
+      flex: 1; display: grid;
+      grid-template-columns: 4fr 2fr;
+      gap: 40px;
+      padding: 100px var(--mg) 40px;
+      overflow: hidden;
+    }
+    .modal-images { overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+    .modal-images::-webkit-scrollbar { display: none; }
+    .modal-images img { width: 100%; height: auto; display: block; border-radius: 8px; }
+    .modal-info { overflow-y: auto; padding-right: 8px; }
+    .modal-info::-webkit-scrollbar { display: none; }
+    .modal-info h2 { font-size: 28px; font-weight: 700; line-height: 1.3; margin-bottom: 20px; }
+    .modal-info p { font-size: 14px; line-height: 1.8; opacity: .7; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor -->
+  <div id="cursor"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo"><img src="assets/3amDS.svg" alt="3am"></div>
+    <ul class="nav-links">
+      <li><a href="#works">Works</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#talk">Talk</a></li>
+    </ul>
+    <div class="nav-right">
+      <img src="assets/Light-mode.svg" alt="">
+      <span>Light mode</span>
+    </div>
+  </nav>
+
+  <!-- HERO — positions from Figma Landing frame 1940×1025 -->
+  <section class="hero">
+    <div class="hero-ayoh">
+      <img src="assets/ayoh.svg" alt="Ayoh!">
+    </div>
+    <div class="hand hand-1"><img src="assets/hand_01.svg" class="sway-1" alt=""></div>
+    <div class="hand hand-2"><img src="assets/hand_02.svg" class="sway-2" alt=""></div>
+    <div class="hand hand-3"><img src="assets/hand_03.svg" class="sway-3" alt=""></div>
+    <div class="hand hand-4"><img src="assets/hand_04.svg" class="sway-4" alt=""></div>
+    <div class="hand hand-5"><img src="assets/hand_05.svg" class="sway-5" alt=""></div>
+    <div class="hand hand-6"><img src="assets/hand_06.svg" class="sway-6" alt=""></div>
+    <div class="hero-scroll"></div>
+  </section>
+
+  <!-- WORKS INTRO -->
+  <section id="about" class="works-intro reveal-up">
+    <span class="scroll-label">SCROLL</span>
+    <h2>Hundreds of works,<br>soul in every pixel.</h2>
+    <div class="works-intro-meta">
+      <div class="works-intro-logo"><img src="assets/3am.svg" alt="3am"></div>
+      <div class="works-intro-sub">3am.<br>is a mindset, not a schedule.<br>is the vibe that clears my head.</div>
+    </div>
+    <div class="works-intro-imgs">
+      <div class="wi a"></div>
+      <div class="wi b"></div>
+      <div class="wi c"></div>
+      <div class="wi d"></div>
+      <div class="wi e"></div>
+    </div>
+  </section>
+
+  <!-- SKILLS — Figma 85:57, 1920 × 887 -->
+  <section class="skills">
+    <p class="skills-eyebrow">What we do.</p>
+
+    <div class="skills-word sw-uxui"><span>UXUI</span></div>
+    <div class="skills-word sw-webapp"><span>Web &amp; App</span></div>
+    <div class="skills-word sw-brand"><span>Brand Identity</span></div>
+    <div class="skills-word sw-visual"><span>Visual Communication</span></div>
+    <div class="skills-word sw-digital"><span>Digital Strategy</span></div>
+    <div class="skills-word sw-more"><span>and more…</span></div>
+
+    <div class="skills-vis vis-h1"><img src="assets/visual_01.svg" alt=""></div>
+    <div class="skills-vis vis-h2"><img src="assets/visual_02.svg" alt=""></div>
+    <div class="skills-vis vis-h3"><img src="assets/visual_03.svg" alt=""></div>
+
+    <div class="skills-dot dot-1"></div>
+    <div class="skills-dot dot-2"></div>
+    <div class="skills-dot dot-3"></div>
+    <p class="skills-stat stat-1">15 years of experience</p>
+    <p class="skills-stat stat-2">Hong Kong based. Work everywhere</p>
+    <p class="skills-stat stat-3">30+ awards. 10,000+ coffees</p>
+
+    <div class="skills-award award-hkda"><img src="assets/HKDA.svg" alt="HKDA"></div>
+    <div class="skills-award award-aww"><img src="assets/Awwwards.svg" alt="Awwwards"></div>
+    <div class="skills-award award-w3"><img src="assets/W3.svg" alt="W3"></div>
+    <div class="skills-award award-horizon"><img src="assets/Horizon.svg" alt="Horizon"></div>
+    <div class="skills-award award-web"><img src="assets/WebAward.svg" alt="WebAward"></div>
+    <div class="skills-award award-com"><img src="assets/ComAward.svg" alt="Com Award"></div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="works" class="portfolio-section">
+    <div class="port-grid">
+      <div class="port-card pc-01 portfolio-item reveal-up" data-id="01">
+        <img src="assets/works/01/01_image_01.webp" alt="Project 01">
+      </div>
+      <div class="port-card pc-02 portfolio-item reveal-up" data-id="02" style="transition-delay:100ms">
+        <img src="assets/works/02/02_image_01.webp" alt="Project 02">
+      </div>
+      <div class="port-card pc-03 portfolio-item reveal-up" data-id="03">
+        <img src="assets/works/03/03_image_01.webp" alt="Project 03">
+      </div>
+      <div class="port-card pc-04 portfolio-item reveal-up" data-id="04" style="transition-delay:100ms">
+        <img src="assets/works/04/04_image_01.webp" alt="Project 04">
+      </div>
+      <div class="port-card pc-05 portfolio-item reveal-up" data-id="05" style="transition-delay:200ms">
+        <img src="assets/works/05/05_image_01.webp" alt="Project 05">
+      </div>
+      <div class="port-card pc-06 portfolio-item reveal-up" data-id="06">
+        <img src="assets/works/06/06_image_01.webp" alt="Project 06">
+      </div>
+      <div class="port-card pc-07 portfolio-item reveal-up" data-id="07" style="transition-delay:100ms">
+        <img src="assets/works/07/07_image_01.webp" alt="Project 07">
+      </div>
+    </div>
+  </section>
+
+  <!-- MORE & MORE — scrolling project logos -->
+  <section class="clients-section" style="margin-top:80px;">
+    <p class="clients-label">More &amp; More</p>
+    <div id="clients-marquee-container" class="flex flex-col" style="display:flex;flex-direction:column;gap:16px;"></div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="talk" class="contact-section">
+    <div class="contact-illustration reveal-up">
+      <img src="assets/Footer.svg" alt="3am illustration">
+    </div>
+    <div class="contact-content reveal-up">
+      <!-- aixhuman.svg as the AI x Human heading -->
+      <img class="contact-aixhuman" src="assets/aixhuman.svg" alt="AI × Human Intelligence.">
+      <div class="contact-eyebrow">
+        2026: THE YEAR OF LAUNCH.<br>
+        WHILE OTHERS FEAR THE MACHINE,<br>
+        I SYNCHRONIZE WITH IT.
+      </div>
+      <p class="contact-body">By mastering the latest tech, I deliver smarter, faster &amp; more flexible design solutions that fit your budget, without compromising the soul of the craft.</p>
+      <div class="contact-divider"></div>
+      <p class="contact-cta">WANT TO COLLABORATE?</p>
+      <p class="contact-cta-b">WORK WITH 3AM.</p>
+      <div class="contact-links">
+        <a href="mailto:ericng@hello-3am.com">ericng@hello-3am.com</a>
+        <a href="tel:+85263577861">+852 6357 7861</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <img src="assets/3am.svg" alt="3am">
+    <p class="footer-copy">Copyright © 2026 3am Design Studio. All rights reserved.</p>
+  </footer>
+
+  <!-- MODAL BACKDROP -->
+  <div id="modal-backdrop"></div>
+
+  <!-- PROJECT MODAL -->
+  <div id="project-modal">
+    <div class="modal-header">
+      <div></div>
+      <div class="modal-header-center">PROJECT HIGHLIGHT</div>
+      <div class="modal-header-right">
+        <button class="modal-btn" id="modal-prev">
+          <img src="assets/arrow.svg" alt="prev" style="transform:rotate(180deg)">
+        </button>
+        <button class="modal-btn" id="modal-next">
+          <img src="assets/arrow.svg" alt="next">
+        </button>
+        <button class="modal-btn" id="modal-close">
+          <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M13 1L1 13M1 1L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-images" id="modal-images"></div>
+      <div class="modal-info">
+        <h2 id="modal-title"></h2>
+        <p id="modal-desc"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Lenis smooth scroll
+    const lenis = new Lenis();
+    lenis.on('scroll', () => {});
+    function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+    requestAnimationFrame(raf);
+
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.transform = `translate3d(${e.clientX - cursor.offsetWidth/2}px,${e.clientY - cursor.offsetHeight/2}px,0)`;
+    });
+    document.querySelectorAll('a, button, .modal-btn').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+    document.querySelectorAll('.portfolio-item').forEach(el => {
+      el.addEventListener('mouseenter', () => { cursor.classList.remove('hover'); cursor.classList.add('discover'); });
+      el.addEventListener('mouseleave', () => cursor.classList.remove('discover'));
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('active'); observer.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal-up').forEach(el => observer.observe(el));
+
+    // More & More scrolling logos
+    const logos = Array.from({length: 12}, (_,i) => `assets/project_logo/logo_${String(i+1).padStart(2,'0')}.svg`);
+    const allLogos = [...logos, ...logos]; // 24 for seamless loop
+    const container = document.getElementById('clients-marquee-container');
+
+    [{ dir: 'rl', delay: '0s' }, { dir: 'lr', delay: '-15s' }].forEach(row => {
+      const track = document.createElement('div');
+      track.className = 'client-marquee-track';
+      const group = document.createElement('div');
+      group.className = `client-marquee-group anim-${row.dir}`;
+      group.style.animationDelay = row.delay;
+      allLogos.forEach(src => {
+        const wrap = document.createElement('div');
+        wrap.className = 'client-logo-wrapper';
+        const img = document.createElement('img');
+        img.src = src; img.alt = '';
+        wrap.appendChild(img);
+        group.appendChild(wrap);
+      });
+      track.appendChild(group);
+      container.appendChild(track);
+    });
+
+    // Project data
+    const projectsData = {
+      '01': { title: 'Hong Kong Palace Museum Website & Digital Experience', desc: 'A comprehensive digital presence for Hong Kong\'s premier cultural institution, showcasing 5000+ years of Chinese history through an immersive web experience with responsive design and bilingual support.', images: 3 },
+      '02': { title: 'Chow Sang Sang Sustainability Website', desc: 'Digital platform for 周生生 sustainable development initiatives, featuring clean information architecture and compelling visual storytelling around environmental responsibility.', images: 3 },
+      '03': { title: 'Harbour Plaza Hotels & Resorts Website Revamp', desc: 'Large-scale digital transformation for 11 hotel websites across three major brands, built on a centralized Laravel CMS managing 8,500+ guest rooms with brand-specific flexibility.', images: 3 },
+      '04': { title: 'Chow Sang Sang Digital Ecosystem & Omnichannel', desc: 'Comprehensive digital ecosystem across Greater China including CMS, CRM integration, Star Shopper loyalty program, and iPad retail tools for frontline sales advisors.', images: 6 },
+      '05': { title: 'HKICL Website Revamp', desc: 'Critical branding platform for Hong Kong\'s interbank clearing services, introducing the Faster Payment System with rigorous security standards and WCAG 2.0 AA compliance.', images: 3 },
+      '06': { title: 'Bangadang Farm Australia Digital Presence', desc: 'Immersive digital platform for an 850-acre regenerative farm in Western Australia, showcasing sustainable agriculture and diverse ecosystems through WordPress and Elementor.', images: 4 },
+      '07': { title: 'Emphasis Jewellery Brand Website & Membership Portal', desc: 'Complete digital revolution for luxury retailer Emphasis, harmonizing a sophisticated Blue-and-Champagne brand identity with high-performance RWD across all devices.', images: 3 }
+    };
+
+    let currentId = null;
+    const modal = document.getElementById('project-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+
+    const openModal = id => {
+      currentId = id;
+      const data = projectsData[id];
+      document.getElementById('modal-title').textContent = data.title;
+      document.getElementById('modal-desc').textContent = data.desc;
+      const imagesEl = document.getElementById('modal-images');
+      imagesEl.innerHTML = '';
+      for (let i = 1; i <= data.images; i++) {
+        const img = document.createElement('img');
+        img.src = `assets/works/${id}/${id}_image_${String(i).padStart(2,'0')}.webp`;
+        img.onerror = () => img.remove();
+        imagesEl.appendChild(img);
+      }
+      modal.classList.add('open');
+      backdrop.classList.add('open');
+      lenis.stop();
+    };
+
+    const closeModal = () => {
+      modal.classList.remove('open');
+      backdrop.classList.remove('open');
+      lenis.start();
+    };
+
+    document.querySelectorAll('.portfolio-item').forEach(el => {
+      el.addEventListener('click', () => openModal(el.dataset.id));
+    });
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+
+    document.getElementById('modal-prev').addEventListener('click', () => {
+      const keys = Object.keys(projectsData);
+      const idx = keys.indexOf(currentId);
+      openModal(keys[idx === 0 ? keys.length - 1 : idx - 1]);
+    });
+    document.getElementById('modal-next').addEventListener('click', () => {
+      const keys = Object.keys(projectsData);
+      const idx = keys.indexOf(currentId);
+      openModal(keys[idx === keys.length - 1 ? 0 : idx + 1]);
+    });
+  </script>
+</body>
+</html>
